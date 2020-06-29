@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   raycaster_flat.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: seunkim <seunkim@student.42seoul.kr>       +#+  +:+       +#+        */
+/*   By: seunkim <seunkim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/27 01:50:15 by seunkim           #+#    #+#             */
-/*   Updated: 2020/06/27 01:50:50 by seunkim          ###   ########.fr       */
+/*   Updated: 2020/06/29 20:30:09 by seunkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,10 @@
 
 #define RED 0xff0000
 #define DARKRED 0x6f0000
+#define GREEN 0x00ff00
+#define DARKGREEN 0x006f00
+#define BLUE 0x0000ff
+#define YELLOW 0xffff00
 
 # define SPEED 0.15
 # define TURN 0.05
@@ -122,6 +126,120 @@ int draw_map(t_game *game)
     return (1);
 }
 
+int     ft_draw(t_game *game)
+{
+    int     x;
+    int     y;
+
+    // 방햫키를 누를떄마다 새로 화면의 이미지를 갱신해줘야 함.
+    game->img = mlx_new_image(game->mlx, screenWidth, screenHeight);
+    game->data = (int *)mlx_get_data_addr(game->img, &game->bpp, &game->size_l, &game->endian);
+    
+    while (x < screenWidth)
+    {
+        // 카메라 평면 -1(화면 왼쪽) 에서 1(화면 오른쪽)
+        game->cameraX = 2 * x / (double)screenWidth - 1;
+        // 광선의 방향 백터
+        game->rayDirX = game->dirX + game->planeX * game->cameraX;
+        game->rayDirY = game->dirY + game->planeY * game->cameraX;
+
+        // 현재 어떤 위치에 있는지.. 소수점을 없앰. (floor() 내림 함수 사용해도 됨.)
+        game->mapX = (int)game->posX;
+        game->mapY = (int)game->posY;
+
+        game->deltaDistX = fabs(1 / game->rayDirX);
+        game->deltaDistY = fabs(1 / game->rayDirY);
+
+        game->hit = 0;
+
+        if (game->rayDirX < 0)
+        {
+            game->stepX = -1;
+            game->sideDistX = (game->posX - game->mapX) * game->deltaDistX;
+        }
+        else
+        {
+            game->stepX = 1;
+            game->sideDistX = (game->mapX + 1.0 - game->posX) * game->deltaDistX;
+        }
+        if (game->rayDirY < 0)
+        {
+            game->stepY = -1;
+            game->sideDistY = (game->posY - game->mapY) * game->deltaDistY;
+        }
+        else
+        {
+            game->stepY = 1;
+            game->sideDistY = (game->mapY + 1.0 - game->posY) * game->deltaDistY;
+        }
+        
+        // DDA
+        while (game->hit == 0)
+        {
+            if (game->sideDistX < game->sideDistY)
+            {   
+                // x좌표에서 광선과 만나는 점과의 거리들을 더함.
+                game->sideDistX += game->deltaDistX;
+                game->mapX += game->stepX;
+                game->side = 0;
+            }
+            else
+            {
+                game->sideDistY += game->deltaDistY;
+                game->mapY += game->stepY;
+                game->side = 1;
+            }
+            // 벽에 부딛힘.
+            if (game->map[game->mapX][game->mapY] > 0)
+                game->hit = 1;
+        }
+        
+        if (game->side == 0)
+            game->perpWallDist = (game->mapX - game->posX + (1 - game->stepX) / 2) / game->rayDirX;
+        else
+            game->perpWallDist = (game->mapY - game->posY + (1 - game->stepY) / 2) / game->rayDirY;
+        
+        game->lineHeight = (int)(screenHeight / game->perpWallDist);
+
+        game->drawStart = -game->lineHeight / 2 + screenHeight / 2;
+        if (game->drawStart < 0)
+            game->drawStart = 0;
+
+        game->drawEnd = game->lineHeight / 2 + screenHeight / 2;
+        if (game->drawEnd >= screenHeight)
+            game->drawEnd = screenHeight - 1;
+
+        /*
+        
+        */
+        
+        y = game->drawStart;
+        while (y <= game->drawEnd)
+        {
+            if (game->side == 1)
+            {
+                if ((game->rayDirX <= 0 && game->rayDirY <= 0) || (game->rayDirX >= 0 && game->rayDirY <= 0))
+                    game->data[x + y * screenWidth] = BLUE; // y축은 어둡게
+                else
+                    game->data[x + y * screenWidth] = YELLOW;
+            }
+            else
+            {
+                if ((game->rayDirX <= 0 && game->rayDirY <= 0) || (game->rayDirX <= 0 && game->rayDirY >= 0))
+                    game->data[x + y * screenWidth] = RED;
+                else
+                    game->data[x + y * screenWidth] = GREEN;
+            }
+            y++;
+        }
+        x++;
+    }
+
+    // 이미지 창에 보여주기
+    mlx_put_image_to_window(game->mlx, game->win, game->img, 0, 0);
+    return (1);
+}
+
 int     handlekey(int key, t_game *game)
 {
         if (key == ESC)
@@ -174,113 +292,12 @@ int     handlekey(int key, t_game *game)
             game->planeX = game->planeX * cos(TURN) - game->planeY * sin(TURN);
             game->planeY = game->oldPlaneX * sin(TURN) + game->planeY * cos(TURN);
         }
-        printf("pos x=%f y=%f\n", game->posX, game->posY);
         return (1);
 }
 
 int 	close(t_game *game)
 {
 		exit(0);
-}
-
-int     ft_draw(t_game *game)
-{
-    int     x;
-    int     y;
-
-    // 방햫키를 누를떄마다 새로 화면의 이미지를 갱신해줘야 함.
-    game->img = mlx_new_image(game->mlx, screenWidth, screenHeight);
-    game->data = (int *)mlx_get_data_addr(game->img, &game->bpp, &game->size_l, &game->endian);
-
-    while (x < screenWidth)
-    {
-        // 카메라 평면 -1(화면 왼쪽) 에서 1(화면 오른쪽)
-        game->cameraX = 2 * x / (double)screenWidth - 1;
-        // 광선의 방향 백터
-        game->rayDirX = game->dirX + game->planeX * game->cameraX;
-        game->rayDirY = game->dirY + game->planeY * game->cameraX;
-
-        // 현재 어떤 위치에 있는지.. 소수점을 없앰. (floor() 내림 함수 사용해도 됨.)
-        game->mapX = (int)game->posX;
-        game->mapY = (int)game->posY;
-
-        game->deltaDistX = fabs(1 / game->rayDirX);
-        game->deltaDistY = fabs(1 / game->rayDirY);
-
-        game->hit = 0;
-
-        if (game->rayDirX < 0)
-        {
-            game->stepX = -1;
-            game->sideDistX = (game->posX - game->mapX) * game->deltaDistX;
-        }
-        else
-        {
-            game->stepX = 1;
-            game->sideDistX = (game->mapX + 1.0 - game->posX) * game->deltaDistX;
-        }
-        if (game->rayDirY < 0)
-        {
-            game->stepY = -1;
-            game->sideDistY = (game->posY - game->mapY) * game->deltaDistY;
-        }
-        else
-        {
-            game->stepY = 1;
-            game->sideDistY = (game->mapY + 1.0 - game->posY) * game->deltaDistY;
-        }
-
-        // DDA
-        while (game->hit == 0)
-        {
-            if (game->sideDistX < game->sideDistY)
-            {   
-                // x좌표에서 광선과 만나는 점과의 거리들을 더함.
-                game->sideDistX += game->deltaDistX;
-                game->mapX += game->stepX;
-                game->side = 0;
-            }
-            else
-            {
-                game->sideDistY += game->deltaDistY;
-                game->mapY += game->stepY;
-                game->side = 1;
-            }
-            if (game->map[game->mapX][game->mapY] > 0)
-                game->hit = 1;
-        }
-        
-        if (game->side == 0)
-            game->perpWallDist = (game->mapX - game->posX + (1 - game->stepX) / 2) / game->rayDirX;
-        else
-            game->perpWallDist = (game->mapY - game->posY + (! - game->stepY) / 2) / game->rayDirY;
-        
-        game->lineHeight = (int)(screenHeight / game->perpWallDist);
-
-        game->drawStart = -game->lineHeight / 2 + screenHeight / 2;
-        if (game->drawStart < 0)
-            game->drawStart = 0;
-
-        game->drawEnd = game->lineHeight / 2 + screenHeight / 2;
-        if (game->drawEnd >= screenHeight)
-            game->drawEnd = screenHeight - 1;
-        
-        y = game->drawStart;
-        while (y <= game->drawEnd)
-        {
-            if (game->side == 1)
-                game->data[x + y * screenWidth] = DARKRED; // y축은 어둡게
-            else
-                game->data[x + y * screenWidth] = RED;
-            y++;
-        }
-        //printf("%d - start:%d end:%d\n", x, game->drawStart, game->drawEnd);
-        x++;
-    }
-
-    // 이미지 창에 보여주기
-    mlx_put_image_to_window(game->mlx, game->win, game->img, 0, 0);
-    return (1);
 }
 
 int main(void)
@@ -292,11 +309,11 @@ int main(void)
     x = 0;
     game.mlx = mlx_init();
     game.win = mlx_new_window(game.mlx, screenWidth, screenHeight, "example");
-    
+
     draw_map(&game);
 
     game.posX = 22;     // 현재위치
-    game.posY = 12;      
+    game.posY = 12;
     game.dirX = -1;     // 방향 백터
     game.dirY = 0;
     game.planeX = 0;    // 카메라 평면

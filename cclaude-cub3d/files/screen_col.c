@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   screen_col.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
+/*   By: seunkim <seunkim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/09 19:37:22 by cclaude           #+#    #+#             */
-/*   Updated: 2020/01/06 13:21:47 by cclaude          ###   ########.fr       */
+/*   Updated: 2020/06/29 14:57:47 by seunkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,7 @@ int				ft_size(t_all *s)
 
 void			ft_stock(t_all *s)
 {
+	// index에 저장하기
 	s->stk[s->ray.i].x = s->ray.x;
 	s->stk[s->ray.i].y = s->ray.y;
 	s->stk[s->ray.i].d = s->hit.d;

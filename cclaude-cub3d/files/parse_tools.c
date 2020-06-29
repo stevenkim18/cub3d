@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_tools.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
+/*   By: seunkim <seunkim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/13 21:41:51 by cclaude           #+#    #+#             */
-/*   Updated: 2020/01/02 17:17:26 by cclaude          ###   ########.fr       */
+/*   Updated: 2020/06/29 15:06:47 by seunkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ int		ft_res(t_all *s, char *line, int *i)
 	return (0);
 }
 
+// 천장과 바닥 칼라 hex 코드를 처리해주는 함수
 int		ft_colors(unsigned int *color, char *line, int *i)
 {
 	int	r;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_map.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
+/*   By: seunkim <seunkim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/13 21:41:46 by cclaude           #+#    #+#             */
-/*   Updated: 2020/01/21 14:36:36 by cclaude          ###   ########.fr       */
+/*   Updated: 2020/06/29 15:32:38 by seunkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,12 @@ int		ft_xpm(t_all *s, unsigned int **adr, char *file)
 	if ((fd = open(file, O_RDONLY)) == -1)
 		return (-1);
 	close(fd);
+	// tab[0] -> xpm 파일의 가로 길이 / tab[1] -> xpm 파일의 세로 길이
 	img = mlx_xpm_file_to_image(s->mlx.ptr, file, &tab[0], &tab[1]);
 	// xpm 파일에 가로 세로 길이가 64픽셀 같음.
 	if (img == NULL || tab[0] != 64 || tab[1] != 64)
 		return (-1);
+	// tex.n tex.s tex.w tex.e tex.i에 xpm 이미지의 정보를(색 코드들) 넣어줌.
 	*adr = (unsigned int *)mlx_get_data_addr(img, &tab[2], &tab[3], &tab[4]);
 	free(img);
 	return (0);
@@ -39,7 +41,8 @@ int		ft_texture(t_all *s, unsigned int **adr, char *line, int *i)
 {
 	char	*file;
 	int		j;
-
+	
+	// tex.n, tex.s tex.w tex.e tex.i가 비어 있는지 확인.
 	if (*adr != NULL)
 		return (-7);	// "Error : Texture path specified twice"
 	(*i) += 2;
