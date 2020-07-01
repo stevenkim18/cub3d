@@ -6,7 +6,7 @@
 /*   By: seunkim <seunkim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/27 01:50:15 by seunkim           #+#    #+#             */
-/*   Updated: 2020/06/29 20:30:09 by seunkim          ###   ########.fr       */
+/*   Updated: 2020/07/01 16:47:03 by seunkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,17 @@
 #define mapHeight 24
 #define screenWidth 640
 #define screenHeight 480
+
+typedef struct  s_img
+{
+    void    *img;
+    int     width;
+    int     height;
+    int     bpp;
+    int     size_line;
+    int     endian;
+    int     *data;
+}               t_img;
 
 typedef struct  s_game
 {
@@ -90,8 +101,17 @@ typedef struct  s_game
     int         drawStart;
     int         drawEnd;
 
+    double      wallX;
+    int         texX;
+    int         texY;
+
+    double      step;
+    double      texPos;
+    
     double      oldDirX;
     double      oldPlaneX;
+
+    t_img       *tex;
 }               t_game;
 
 int draw_map(t_game *game)
@@ -130,6 +150,7 @@ int     ft_draw(t_game *game)
 {
     int     x;
     int     y;
+    int     color;
 
     // 방햫키를 누를떄마다 새로 화면의 이미지를 갱신해줘야 함.
     game->img = mlx_new_image(game->mlx, screenWidth, screenHeight);
@@ -209,13 +230,30 @@ int     ft_draw(t_game *game)
         if (game->drawEnd >= screenHeight)
             game->drawEnd = screenHeight - 1;
 
-        /*
+        // 텍스쳐 추가
+        if (game->side == 0)
+            game->wallX = game->posY + game->perpWallDist * game->rayDirY;
+        else
+            game->wallX = game->posX + game->perpWallDist * game->rayDirX;
+        game->wallX -= floor(game->wallX);
         
-        */
+        game->texX = (int)(game->wallX * (double)64);
+        if (game->side == 0 && game->rayDirX > 0)
+            game->texX = 64 - game->texX - 1;
+        if (game->side == 1 && game->rayDirX < 0)
+            game->texX = 64 - game->texX - 1;
+        
+        game->step = 1.0 * 64 / game->lineHeight;
+        
+        game->texPos = (game->drawStart - mapHeight / 2 + game->lineHeight / 2) * game->step;
         
         y = game->drawStart;
         while (y <= game->drawEnd)
         {
+            // game->texY = (int)game->texPos & (64 - 1);
+            // game->texPos += game->step;
+            // color = game->tex->data[game->tex->width * game->texY + game->texX];
+            // game->data[x + y * screenWidth] = color;
             if (game->side == 1)
             {
                 if ((game->rayDirX <= 0 && game->rayDirY <= 0) || (game->rayDirX >= 0 && game->rayDirY <= 0))
@@ -321,6 +359,14 @@ int main(void)
     game.time = 0;
     game.oldTime = 0;
 
+    // printf("1111111111\n");
+    // game.tex = (t_img *)malloc(sizeof(t_img));
+    // bzero(game.tex, sizeof(t_img));
+    // printf("22222222222\n");
+    // game.tex->img = mlx_xpm_file_to_image(game.mlx, "./tex/brick.xpm", &game.tex->width, &game.tex->height);
+    // printf("33333\n");
+    // game.tex->data = (int *)mlx_get_data_addr(game.tex->img, &game.tex->bpp, &game.tex->size_line, &game.tex->endian);
+    // printf("44444\n");
     mlx_loop_hook(game.mlx, &ft_draw, &game);
 
     // 키보드 입력 처리
