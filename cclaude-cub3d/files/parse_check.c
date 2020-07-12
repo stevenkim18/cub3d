@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_check.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
+/*   By: seunkim <seunkim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/02 17:16:06 by cclaude           #+#    #+#             */
-/*   Updated: 2020/01/02 17:24:54 by cclaude          ###   ########.fr       */
+/*   Updated: 2020/06/29 15:21:21 by seunkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ int		ft_parcheck(t_all *s)
 		return (ft_strerror(-14));		// 해상도 애러
 	else if ((s->tex.n == NULL || s->tex.s == NULL || s->tex.e == NULL)
 			|| (s->tex.w == NULL || s->tex.i == NULL))
-		return (ft_strerror(-15)); 		// 벽 이미지 애러
+		return (ft_strerror(-15)); 		// 벽 이미지 불러오기 에러
 	else if (s->tex.c == NONE || s->tex.f == NONE)
 		return (ft_strerror(-16));		// 색 애러
 	else if (s->err.p == 0)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
+/*   By: seunkim <seunkim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/04 15:00:09 by cclaude           #+#    #+#             */
-/*   Updated: 2020/01/21 12:50:25 by cclaude          ###   ########.fr       */
+/*   Updated: 2020/06/29 15:43:29 by seunkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,21 +101,21 @@ typedef struct	s_pos
 	double			y;
 }				t_pos;
 
-// 플레이어가 바라보고 있는 방향
+// 플레이어가 바라보고 있는 방향 백터
 typedef struct	s_dir
 {
-	double			x;
-	double			y;
+	double			x;		// 1 or -1
+	double			y;		// 1 or -1
 	double			a;
 }				t_dir;
 
 // 광선q
 typedef struct	s_ray
 {
-	double			x;
-	double			y;
-	int				i;		//광선의 index
-	double			v;
+	double			x;		// 플레이어가 쏜 광선의 백터 x
+	double			y;		// 플레이어가 쏜 광선의 백터 y
+	int				i;		// 광선의 index (광선 개수)
+	double			v;		// 
 	double			w;
 }				t_ray;
 
